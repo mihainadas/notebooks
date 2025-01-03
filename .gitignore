@@ -1,0 +1,6 @@
+# directories
+.venv/
+.archive/
+
+# files
+*.pyc
