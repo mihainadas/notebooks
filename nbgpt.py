@@ -26,9 +26,12 @@ logger = logging.getLogger(__name__)
 
 
 def call_openai_llm(*llm_user_prompt):
-    logger.info("Calling OpenAI LLM with user prompt.")
     model = "gpt-4o"
-    llm_prompt_system = "You are a world class, helpful academic peer reviewer that acts as a helpful assistant for improving Jupyter notebooks, containing both code and markdown cells."
+    llm_prompt_system = """
+    You are a world class, academic peer reviewer that acts as a helpful assistant for improving Jupyter notebooks developed for young students, containing both code and markdown cells.
+    The resulting notebook should be more readable, maintainable, and efficient. You are expected to provide constructive feedback and suggestions for improvement.
+    You can also suggest additional code snippets, explanations, or visualizations to enhance the notebook. Please ensure that the notebook is still functional after your changes.
+    """
     messages = [
         {"role": "system", "content": llm_prompt_system},
         {"role": "user", "content": "\n".join(llm_user_prompt)},
@@ -37,7 +40,6 @@ def call_openai_llm(*llm_user_prompt):
         completion = client.chat.completions.create(
             model=model, messages=messages, max_tokens=1500
         )
-        logger.info("Received response from OpenAI LLM.")
         return completion.choices[0].message.content
     except Exception as e:
         logger.error(f"An error occurred while calling OpenAI LLM: {e}")
@@ -82,7 +84,7 @@ def get_nbcell_list(
 
 def generate_analysis(nbcell_list):
     logger.info("Generating analysis for notebook cells.")
-    llm_prompt = "Analyze the following Python notebook and suggest improvements:"
+    llm_prompt = "Analyze the following Python notebook and suggest improvements that would take it to the next level:"
     try:
         combined_content = "\n".join(cell["source"] for cell in nbcell_list)
         analysis = call_openai_llm(llm_prompt, combined_content)
@@ -94,8 +96,12 @@ def generate_analysis(nbcell_list):
 
 
 def generate_improved_nbcell(nbcell_list, llm_analysis, nbcell):
-    logger.info("Generating improved notebook cell.")
-    llm_prompt = "Improve the following Python notebook CELL given the ORIGINAL and this ANALYSIS. Make sure that you strictly reply with the IMPROVED CELL content only. When using LaTeX, please use double dollar signs ($$) to wrap the LaTeX content."
+    llm_prompt = """
+    Significantly adjust the following Python notebook CELL given the ORIGINAL and following the improvements suggested by the ANALYSIS.
+    Make sure that you strictly reply with the IMPROVED CELL content only, *without any leading markers*.
+    When using LaTeX, you must only use single dollar signs ($) to wrap the LaTeX content.
+    The resulting content should be in Romanian.
+    """
     try:
         improved_cell = call_openai_llm(
             llm_prompt,
@@ -103,19 +109,21 @@ def generate_improved_nbcell(nbcell_list, llm_analysis, nbcell):
             f"ANALYSIS: {llm_analysis}",
             f"CELL: {nbcell}",
         )
-        logger.info("Improved cell generated successfully.")
         return improved_cell
     except Exception as e:
         logger.error(f"An error occurred during improvement: {e}")
         raise
 
 
-def generate_improved_nb(nb_path):
+def generate_improved_nb(nb_path, cell_types=["markdown"]):
     logger.info(f"Generating improved notebook for '{nb_path}'")
     nbcell_list = get_nbcell_list(nb_path)
     llm_analysis = generate_analysis(nbcell_list)
     nbcell_list_improved = []
     for cell in tqdm(nbcell_list, desc="Generating iterative improvements"):
+        if cell["type"] not in cell_types:
+            nbcell_list_improved.append(cell)
+            continue
         improved_cell = generate_improved_nbcell(
             nbcell_list, llm_analysis, cell["source"]
         )
@@ -132,6 +140,7 @@ def save_new_nb(nbcell_list, output_path):
         new_nb = nbformat.v4.new_notebook()
         for cell in nbcell_list:
             new_cell = nbformat.v4.new_code_cell(cell["source"])
+            new_cell.cell_type = cell["type"]
             new_nb.cells.append(new_cell)
         with open(output_path, "w", encoding="utf-8") as file:
             nbformat.write(new_nb, file)
