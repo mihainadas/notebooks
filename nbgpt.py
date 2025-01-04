@@ -97,21 +97,40 @@ def generate_analysis(nbcell_list):
 
 def generate_improved_nbcell(nbcell_list, llm_analysis, nbcell):
     llm_prompt = """
-    Significantly adjust the following Python notebook CELL given the ORIGINAL and following the improvements suggested by the ANALYSIS.
-    Make sure that you strictly reply with the IMPROVED CELL content only, *without any leading markers*.
+    Significantly adjust the following Python notebook CELL, part of the ORIGINAL_NOTEBOOK, following the improvements suggested by the ANALYSIS.
+    Make sure that you strictly reply with the adjusted content only, *without any leading markers*.
     When using LaTeX, you must only use single dollar signs ($) to wrap the LaTeX content.
-    The resulting content should be in Romanian.
     """
     try:
         improved_cell = call_openai_llm(
             llm_prompt,
-            f"ORIGINAL: {nbcell_list}",
+            f"ORIGINAL_NOTEBOOK: {nbcell_list}",
             f"ANALYSIS: {llm_analysis}",
             f"CELL: {nbcell}",
         )
         return improved_cell
     except Exception as e:
         logger.error(f"An error occurred during improvement: {e}")
+        raise
+
+
+def generate_translated_nbcell(nbcell_list, language, nbcell):
+    llm_prompt = """
+    Translate the following Python notebook CELL to the specified TARGET_LANGUAGE.
+    Make sure that you strictly reply with the translated content only, *without any leading markers* (such as ```markdown or ```python).
+    When using LaTeX, you must only use single dollar signs ($) to wrap the LaTeX content.
+    If the cell contains code, stricly translate the comments only, without modifying the code itself.
+    """
+    try:
+        translated_cell = call_openai_llm(
+            llm_prompt,
+            f"ORIGINAL: {nbcell_list}",
+            f"TARGET_LANGUAGE: {language}",
+            f"CELL: {nbcell}",
+        )
+        return translated_cell
+    except Exception as e:
+        logger.error(f"An error occurred during translation: {e}")
         raise
 
 
@@ -134,6 +153,24 @@ def generate_improved_nb(nb_path, cell_types=["markdown"]):
     return nbcell_list_improved
 
 
+def generate_translated_nb(nb_path, language="ro", cell_types=["markdown", "code"]):
+    logger.info(f"Generating translated notebook for '{nb_path}'")
+    nbcell_list = get_nbcell_list(nb_path)
+    nbcell_list_translated = []
+    for cell in tqdm(nbcell_list, desc="Generating iterative translations"):
+        if cell["type"] not in cell_types:
+            nbcell_list_translated.append(cell)
+            continue
+        translated_cell = generate_translated_nbcell(
+            nbcell_list, language, cell["source"]
+        )
+        new_cell = cell.copy()
+        new_cell["source"] = translated_cell
+        nbcell_list_translated.append(new_cell)
+    logger.info("Translated notebook cells generated successfully.")
+    return nbcell_list_translated
+
+
 def save_new_nb(nbcell_list, output_path):
     logger.info(f"Saving new notebook to '{output_path}'")
     try:
@@ -152,5 +189,8 @@ def save_new_nb(nbcell_list, output_path):
 
 nb_path = "perceptron.ipynb"
 nb_improved_path = nb_path.replace(".ipynb", "_improved.ipynb")
+nb_translated_path = nb_path.replace(".ipynb", "_translated.ipynb")
 nbcell_list_improved = generate_improved_nb(nb_path)
 save_new_nb(nbcell_list_improved, nb_improved_path)
+nbcell_list_translated = generate_translated_nb(nb_improved_path)
+save_new_nb(nbcell_list_translated, nb_translated_path)
