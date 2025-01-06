@@ -1,15 +1,13 @@
-import nbformat
-import sys
-from openai import OpenAI
-import argparse
-from tqdm import tqdm
 import logging
+import sys
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+import nbformat
+from tqdm import tqdm
 
-# Initialize OpenAI client
-client = OpenAI()
 
-
-def configure_logging():
+def configure_logging(level=logging.INFO):
     """
     Configures the logging module to display INFO level messages.
     """
@@ -20,12 +18,47 @@ def configure_logging():
     )
 
 
-configure_logging()
+def get_logger():
+    """
+    Configures and returns a logger instance.
+    """
+    configure_logging()
+    return logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
+
+# Initialize logger
+logger = get_logger()
+
+
+def check_required_vars():
+    """
+    Checks if the required variables are set.
+    """
+    load_dotenv()
+    required_vars = ["OPENAI_API_KEY"]
+    for var in required_vars:
+        if not os.getenv(var):
+            raise EnvironmentError(f"Required environment variable {var} is missing.")
+
+
+check_required_vars()
+
+
+def get_openai_client():
+    """
+    Returns an instance of the OpenAI client.
+    """
+    return OpenAI()
+
+
+# Initialize OpenAI client
+client = get_openai_client()
 
 
 def call_openai_llm(*llm_user_prompt):
+    """
+    Calls the OpenAI language model with the provided user prompt.
+    """
     model = "gpt-4o"
     llm_prompt_system = """
     You are a world class, academic peer reviewer that acts as a helpful assistant for improving Jupyter notebooks developed for young students, containing both code and markdown cells.
@@ -51,6 +84,9 @@ def get_nbcell_list(
     cell_types=["code", "markdown"],
     include_output: bool = False,
 ):
+    """
+    Reads a Jupyter notebook and returns a list of cells of specified types.
+    """
     logger.info(f"Reading notebook from '{notebook_path}'")
     cells_list = []
     try:
@@ -83,6 +119,9 @@ def get_nbcell_list(
 
 
 def generate_analysis(nbcell_list):
+    """
+    Generates an analysis of the notebook cells using OpenAI LLM.
+    """
     logger.info("Generating analysis for notebook cells.")
     llm_prompt = "Analyze the following Python notebook and suggest improvements that would take it to the next level:"
     try:
@@ -96,6 +135,9 @@ def generate_analysis(nbcell_list):
 
 
 def generate_improved_nbcell(nbcell_list, llm_analysis, nbcell):
+    """
+    Generates an improved version of a notebook cell based on LLM analysis.
+    """
     llm_prompt = """
     Significantly adjust the following Python notebook CELL, part of the ORIGINAL_NOTEBOOK, following the improvements suggested by the ANALYSIS.
     Make sure that you strictly reply with the adjusted content only, *without any leading markers*.
@@ -115,11 +157,14 @@ def generate_improved_nbcell(nbcell_list, llm_analysis, nbcell):
 
 
 def generate_translated_nbcell(nbcell_list, language, nbcell):
+    """
+    Translates a notebook cell to the specified language using OpenAI LLM.
+    """
     llm_prompt = """
     Translate the following Python notebook CELL to the specified TARGET_LANGUAGE.
     Make sure that you strictly reply with the translated content only, *without any leading markers* (such as ```markdown or ```python).
     When using LaTeX, you must only use single dollar signs ($) to wrap the LaTeX content.
-    If the cell contains code, stricly translate the comments only, without modifying the code itself.
+    If the cell contains code, strictly translate the comments only, without modifying the code itself.
     """
     try:
         translated_cell = call_openai_llm(
@@ -135,6 +180,9 @@ def generate_translated_nbcell(nbcell_list, language, nbcell):
 
 
 def generate_improved_nb(nb_path, cell_types=["markdown"]):
+    """
+    Generates an improved version of the notebook by iterating through its cells.
+    """
     logger.info(f"Generating improved notebook for '{nb_path}'")
     nbcell_list = get_nbcell_list(nb_path)
     llm_analysis = generate_analysis(nbcell_list)
@@ -154,6 +202,9 @@ def generate_improved_nb(nb_path, cell_types=["markdown"]):
 
 
 def generate_translated_nb(nb_path, language="ro", cell_types=["markdown", "code"]):
+    """
+    Generates a translated version of the notebook by iterating through its cells.
+    """
     logger.info(f"Generating translated notebook for '{nb_path}'")
     nbcell_list = get_nbcell_list(nb_path)
     nbcell_list_translated = []
@@ -172,6 +223,9 @@ def generate_translated_nb(nb_path, language="ro", cell_types=["markdown", "code
 
 
 def save_new_nb(nbcell_list, output_path):
+    """
+    Saves the modified notebook cells to a new notebook file.
+    """
     logger.info(f"Saving new notebook to '{output_path}'")
     try:
         new_nb = nbformat.v4.new_notebook()
@@ -187,10 +241,15 @@ def save_new_nb(nbcell_list, output_path):
         raise
 
 
-nb_path = "perceptron.ipynb"
-nb_improved_path = nb_path.replace(".ipynb", "_improved.ipynb")
-nb_translated_path = nb_path.replace(".ipynb", "_translated.ipynb")
-nbcell_list_improved = generate_improved_nb(nb_path)
-save_new_nb(nbcell_list_improved, nb_improved_path)
-nbcell_list_translated = generate_translated_nb(nb_improved_path)
-save_new_nb(nbcell_list_translated, nb_translated_path)
+# # Paths for the original, improved, and translated notebooks
+# nb_path = "perceptron.ipynb"
+# nb_improved_path = nb_path.replace(".ipynb", "_improved.ipynb")
+# nb_translated_path = nb_path.replace(".ipynb", "_translated.ipynb")
+
+# # Generate improved notebook
+# nbcell_list_improved = generate_improved_nb(nb_path)
+# save_new_nb(nbcell_list_improved, nb_improved_path)
+
+# # Generate translated notebook
+# nbcell_list_translated = generate_translated_nb(nb_improved_path)
+# save_new_nb(nbcell_list_translated, nb_translated_path)

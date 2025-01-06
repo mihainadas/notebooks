@@ -3,5 +3,6 @@
 .archive/
 
 # files
+.venv
 *.pyc
 .DS_Store
