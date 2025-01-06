@@ -6,4 +6,4 @@
 .env
 *.pyc
 .DS_Store
-*.log
+*/*.log
