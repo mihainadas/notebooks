@@ -28,5 +28,5 @@ To convert a Jupyter notebook to HTML documentation:
 
 The generated HTML will be saved in the `docs` directory.
 
-License
-MIT
+## License
+[MIT](LICENSE)
