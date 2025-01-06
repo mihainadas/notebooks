@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>perceptron_improved</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>perceptron_improved_20250106_210913</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7511,7 +7511,7 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=34ac3734">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c93f5da5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7519,21 +7519,23 @@ a.anchor-link {
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="Simple-Perceptron-Implementation">Simple Perceptron Implementation<a class="anchor-link" href="#Simple-Perceptron-Implementation">¶</a></h1><p><em>by Mihai Dan Nadăș (mihai.nadas@ubbcluj.ro), January 2025</em></p>
 <p>This notebook implements a version of the perceptron as introduced by Frank Rosenblatt's 1958 paper, "The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain".</p>
-<p>We will try to use basic math concepts, avoiding linear algebra (i.e., working with vectors and matrices) to the extent possible.</p>
-<h2 id="Objective">Objective<a class="anchor-link" href="#Objective">¶</a></h2><p>The goal is to train a model with two weights, $w_{1},\ w_{2}$, one for each of the coordinates $x,\ y$ of a point defined as $(x,\ y)$, and one bias $b$, using an adaptation of the algebraic equation $y = mx + c$ (the slope-intercept form of a line).</p>
-<p>The model will deal with a simple classification task, for a linearly separable dataset based on the following function:</p>
+<p>We will focus on basic mathematical concepts and minimize the use of linear algebra, avoiding vector and matrix operations where possible.</p>
+<h2 id="Objective">Objective<a class="anchor-link" href="#Objective">¶</a></h2><p>Our objective is to train a model with two weights, $w_{1}$ and $w_{2}$, corresponding to the coordinates $x$ and $y$ of a point $(x, y)$, plus one bias $b$. This is based on adapting the algebraic equation $y = mx + c$, which represents the slope-intercept form of a line.</p>
+<p>The model will address a simple classification task with a linearly separable dataset, generated according to the following function:</p>
+<p>Given an integer $x$:</p>
 <p>$
 f: \mathbb{N} \to \mathbb{N}, \quad f(x) =
 \begin{cases}
-x &amp; \text{if } x \bmod 2 = 0, \\
-2x &amp; \text{if } x \bmod 2 = 1.
+x, &amp; \text{if } x \bmod 2 = 0, \\
+2x, &amp; \text{if } x \bmod 2 = 1.
 \end{cases}
 $</p>
-<h2 id="Dataset">Dataset<a class="anchor-link" href="#Dataset">¶</a></h2><p>First, we will generate a dataset, using the Python Standard Library.</p>
+<p>This function classifies numbers as follows: if $x$ is even, it remains unchanged; if odd, it doubles. This transformation will help classify the numbers based on their parity.</p>
+<h2 id="Dataset">Dataset<a class="anchor-link" href="#Dataset">¶</a></h2><p>We will generate a dataset using the Python Standard Library.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2fcf25d7">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ea266fe9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7575,17 +7577,17 @@ $</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e0ccec4c">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f71d8526">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Visual-Representation">Visual Representation<a class="anchor-link" href="#Visual-Representation">¶</a></h2><p>Using <em>Matplotlib</em> and <em>pandas</em>, we will visually represent the training and test datasets.</p>
+<h2 id="Visual-Representation">Visual Representation<a class="anchor-link" href="#Visual-Representation">¶</a></h2><p>In this section, we will visualize the training and test datasets using <em>Matplotlib</em> and <em>pandas</em>. This visualization allows us to clearly see the separability of the classes, which is an essential part of understanding how the perceptron algorithm will work. By examining the plots, we can identify the linear decision boundary and assess how well the data can be classified.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2d09e5b1">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2bf5a664">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7641,36 +7643,36 @@ $</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0a68c7e0">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9e15b1f1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Defining-a-Linear-Classifier">Defining a Linear Classifier<a class="anchor-link" href="#Defining-a-Linear-Classifier">¶</a></h2><p>With our dataset prepared, we now turn to the mathematical foundation that enables our model to classify an input $x_{1} \ \text{and} \ x_{2}$ as belonging to classes $0$ or $1$, as follows:</p>
+<h2 id="Defining-a-Linear-Classifier">Defining a Linear Classifier<a class="anchor-link" href="#Defining-a-Linear-Classifier">¶</a></h2><p>With our dataset prepared, we now turn to the mathematical foundation that enables our model to classify an input $x_{1}$ and $x_{2}$ as belonging to classes $0$ or $1$. The classification function is defined as follows:</p>
 <p>$
-c: \mathbb{N} \to \{0,1\}, \quad
-c(x_{1},x_{2}) =
+c: \mathbb{N} \times \mathbb{N} \to \{0,1\}, \quad
+c(x_{1}, x_{2}) =
 \begin{cases} 
-1, &amp; \text{if } (x_{1},x_{2}) \in \text{Class 1}, \\
-0, &amp; \text{if } (x_{1},x_{2}) \in \text{Class 2}.
+1, &amp; \text{if } (x_{1}, x_{2}) \in \text{Class 1}, \\
+0, &amp; \text{if } (x_{1}, x_{2}) \in \text{Class 0}.
 \end{cases}
 $</p>
-<p>This classification can be achieved by using the algebraic representation of a line in a Cartesian coordinate system, described by:</p>
+<p>This classification is achieved using the algebraic representation of a line in a Cartesian coordinate system, formulated as:</p>
 <p>$
-z(x) = w_{1}x_{1}+w_{2}x_{2} + c,
+z(x) = w_{1}x_{1} + w_{2}x_{2} + c,
 $</p>
 <p>where:</p>
 <ul>
-<li>$w_{1} \ \text{and} \ w_{2}$ represent the weights that determine the slope, which describes the angle of the resulting line relative to the $x$-axis,</li>
-<li>$c$ is the intercept, indicating where the line intersects the $y$-axis.</li>
+<li>$w_{1}$ and $w_{2}$ are the weights that determine the slope, representing the angle of the line relative to the $x$-axis,</li>
+<li>$c$ is the bias (or intercept), indicating where the line intersects the $y$-axis.</li>
 </ul>
-<p>From the plotted graph above, it becomes clear that the two classes are linearly separable. This makes using a linear separation boundary, where $w_{1} \ \text{and} \ w_{2}$ are trained using Rosenblatt's Perceptron algorithm, appropriate.</p>
-<p>To illustrate this concept, here's how a line defined by $w_{1}=1, \ w_{2}=0.5, \ \text{and} \ c=0$ would look when plotted on our previous graph.</p>
+<p>From the plotted graph above, it is evident that the two classes are linearly separable, justifying the use of a linear decision boundary. The weights $w_{1}$ and $w_{2}$ are adjusted through training with Rosenblatt's Perceptron algorithm to achieve this separation effectively.</p>
+<p>For better understanding, here's how a line defined by $w_{1} = 1$, $w_{2} = 0.5$, and $c = 0$ would appear on our previous plot, illustrating the separation between the classes.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=103d774d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=58d20f7d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7703,17 +7705,17 @@ $</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9d2ef9fb">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cad909bf">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now, it is obvious that in this configuration the data points are separated neatly. However, there are alternative ways to configure $w_{1}$, $w_{2}$, and $c$ that result in less optimal examples. For instance, when $w_{1}=0.1$, $w_{2}=0.1$, and $c=0.5$, we obtain a less ideal separation boundary.</p>
+<p>Now, it is clear that in this configuration, the datapoints are separated effectively. However, there are other configurations for $w_{1}$, $w_{2}$, and $c$ that result in a less effective example. For instance, when $w_{1} = 0.1$, $w_{2} = 0.1$, and $c = 0.5$, we obtain a less optimal separation boundary.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f9db10e2">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5b4be786">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7728,29 +7730,28 @@ $</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d3b83c64">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a92e589f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>In this particular case, $z$ will not help classify any data points.</p>
-<h2 id="Evaluating-the-Performance-of-the-Classifier">Evaluating the Performance of the Classifier<a class="anchor-link" href="#Evaluating-the-Performance-of-the-Classifier">¶</a></h2><p>Now that we have defined $z=w_{1}x_{1}+w_{2}x_{2}+c$ as our classifier's decision boundary, and established visually that it works for some hand-picked values (among others), let's define a computational approach to determine its performance using the <em>accuracy</em> metric.</p>
-<h3 id="Defining-the-Classifier">Defining the Classifier<a class="anchor-link" href="#Defining-the-Classifier">¶</a></h3><p>Before delving into the classifier's performance, let's define it:</p>
-<p>$
-c: \mathbb{N} \to \{0,1\}, \quad
-c(x_{1},x_{2}) =
+<p>In this particular case, the function $z$ is not effective in classifying the data points, indicating that the current weight and bias values are not well-suited for the task.</p>
+<h2 id="Evaluating-the-Performance-of-the-Classifier">Evaluating the Performance of the Classifier<a class="anchor-link" href="#Evaluating-the-Performance-of-the-Classifier">¶</a></h2><p>With the decision boundary $z = w_{1}x_{1} + w_{2}x_{2} + c$ defined, our next step is to evaluate its effectiveness using a metric called <em>accuracy</em>. This will give us a quantifiable measure of how well our classifier is performing on the dataset.</p>
+<h3 id="Defining-the-Classifier-Function">Defining the Classifier Function<a class="anchor-link" href="#Defining-the-Classifier-Function">¶</a></h3><p>Before assessing its performance, let's clearly define our classifier. It can be expressed as:</p>
+<p>$c: \mathbb{R}^2 \to \{0,1\}, \quad
+c(x_{1}, x_{2}) = 
 \begin{cases} 
 1, &amp; \text{if } z(x_{1}, x_{2}) \geq 0, \\
 0, &amp; \text{if } z(x_{1}, x_{2}) &lt; 0.
 \end{cases}
 $</p>
-<p>Essentially, this means that if a point lies above the decision boundary, it will be classified as $1$, otherwise as $0$.</p>
-<p>Let's implement the classifier in code and then return to the discussion about evaluating its performance.</p>
+<p>This means any point $(x_{1}, x_{2})$ that lies above or on the decision boundary, calculated by our linear equation, will be classified as 1. Conversely, points below it will be classified as 0.</p>
+<p>Let's implement this classifier in code, and then we'll proceed to discuss and evaluate its performance in more detail.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1241a82c">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=13fcb448">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7784,18 +7785,25 @@ $</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6d472dc8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fa31d1b4">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Discussion-on-Accuracy">Discussion on Accuracy<a class="anchor-link" href="#Discussion-on-Accuracy">¶</a></h3><p>As demonstrated earlier, different weights and bias values lead to varying accuracy results. This variation occurs because each set of weights and biases forms a distinct decision boundary, which may classify the dataset into classes correctly or incorrectly. The challenge lies in finding the "optimal" values for these parameters. To achieve this, we employ a process called <em>model training</em>.</p>
-<h2 id="Model-Training">Model Training<a class="anchor-link" href="#Model-Training">¶</a></h2><p>Based on the insights from our analysis, we will now proceed to train our model through multiple iterations, adjusting the weights and bias values. This iterative process helps us refine the parameters until we achieve a satisfactory level of accuracy. By doing so, we can determine the best combination of parameters that effectively classify our dataset.</p>
+<h3 id="Discussion-on-Accuracy">Discussion on Accuracy<a class="anchor-link" href="#Discussion-on-Accuracy">¶</a></h3><p>As shown earlier, changing weights and bias values leads to different accuracy outcomes. This is because the weights and biases define the decision boundary, which affects classification accuracy based on how well it separates the classes in the dataset. Therefore, the challenge is to discover the "optimal" values for these parameters. This is achieved via a process known as <em>model training</em>.</p>
+<h2 id="Model-Training">Model Training<a class="anchor-link" href="#Model-Training">¶</a></h2><p>We will now train our model using the knowledge from our analysis. This involves a series of iterations to adjust the weights and bias values until a satisfactory level of accuracy is attained. This iterative method helps us find the best combination of parameters tailored to our dataset and classification task.</p>
+<h3 id="Important-Concepts-in-Model-Training">Important Concepts in Model Training<a class="anchor-link" href="#Important-Concepts-in-Model-Training">¶</a></h3><p>In model training, certain concepts are crucial:</p>
+<ul>
+<li><strong>Epochs:</strong> This refers to one complete pass through the entire training dataset. Multiple epochs may be required to refine the model.</li>
+<li><strong>Learning Rate:</strong> This is the step size used when updating the model's parameters. It determines how quickly or slowly the model learns.</li>
+<li><strong>Weight Updates:</strong> During training, weights are adjusted based on the error of predictions to minimize the divergence from true labels.</li>
+</ul>
+<p>These concepts play a pivotal role in training the model effectively to ensure it generalizes well to new data. By iterating with different epochs and learning rates, we can optimize the decision boundary for better classification results.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b79eb1fc">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1d914ca2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

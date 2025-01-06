@@ -1,7 +1,8 @@
-import logging
-import sys
-import os
 from dotenv import load_dotenv
+import logging
+import os
+import sys
+import yaml
 from openai import OpenAI
 import nbformat
 from tqdm import tqdm
@@ -57,6 +58,41 @@ def get_logger(name=None, log_to_console=False, log_file="nbgpt.log"):
 
 # Initialize logger
 logger = get_logger()
+
+
+# Load configuration from a YAML file
+def load_config(file_path="config.yml"):
+    try:
+        with open(file_path, "r") as file:
+            config = yaml.safe_load(file)
+            logger.info(f"Configuration loaded from file: {file_path}")
+            logger.debug(f"Configuration: {config}")
+            return config
+    except FileNotFoundError:
+        logger.error("Configuration file not found. Using default values.")
+    except yaml.YAMLError as exc:
+        print(f"Error parsing YAML file: {exc}. Using default values.")
+        raise
+
+
+# Retrieve a value from a nested dictionary using a list of keys
+def get_config_value(config, *keys):
+    """
+    Retrieve a value from a nested dictionary using a list of keys.
+
+    :param config: The configuration dictionary.
+    :param keys: A list of keys representing the path to the desired value.
+    :return: The value from the configuration dictionary.
+    :raises KeyError: If any key in the path is not found.
+    """
+    try:
+        value = config
+        for key in keys:
+            value = value[key]
+        return value
+    except KeyError as e:
+        logger.error(f"Key not found in configuration: {e}")
+        raise
 
 
 def check_required_vars():

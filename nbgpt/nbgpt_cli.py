@@ -1,46 +1,17 @@
-from core import get_logger, generate_improved_nb, generate_translated_nb, save_new_nb
-import yaml
+from core import (
+    get_logger,
+    generate_improved_nb,
+    generate_translated_nb,
+    save_new_nb,
+    load_config,
+    get_config_value,
+)
 import argparse
 import sys
 from datetime import datetime
 
 # Initialize logger
 logger = get_logger()
-
-
-# Load configuration from a YAML file
-def load_config(file_path="config.yml"):
-    try:
-        with open(file_path, "r") as file:
-            config = yaml.safe_load(file)
-            logger.info(f"Configuration loaded from file: {file_path}")
-            logger.debug(f"Configuration: {config}")
-            return config
-    except FileNotFoundError:
-        logger.error("Configuration file not found. Using default values.")
-    except yaml.YAMLError as exc:
-        print(f"Error parsing YAML file: {exc}. Using default values.")
-        raise
-
-
-# Retrieve a value from a nested dictionary using a list of keys
-def get_config_value(config, *keys):
-    """
-    Retrieve a value from a nested dictionary using a list of keys.
-
-    :param config: The configuration dictionary.
-    :param keys: A list of keys representing the path to the desired value.
-    :return: The value from the configuration dictionary.
-    :raises KeyError: If any key in the path is not found.
-    """
-    try:
-        value = config
-        for key in keys:
-            value = value[key]
-        return value
-    except KeyError as e:
-        logger.error(f"Key not found in configuration: {e}")
-        raise
 
 
 # Parse command-line arguments
@@ -70,6 +41,7 @@ def get_new_nb_path(nb_path, suffix):
 
 # Create an improved version of the notebook
 def make_improved_nb(config, nb_path):
+    print(f"Improving notebook '{nb_path}' ...")
     system_prompt = get_config_value(config, "system_prompt")
     analysis_prompt = get_config_value(config, "improve", "prompts", "analysis")
     improvement_prompt = get_config_value(config, "improve", "prompts", "improvement")
@@ -78,11 +50,14 @@ def make_improved_nb(config, nb_path):
     )
     new_nb_path = get_new_nb_path(nb_path, "improved")
     save_new_nb(improved_nb, new_nb_path)
-    logger.info(f"Saving improved notebook to '{new_nb_path}'")
+    logger_msg = f"Saved improved notebook to '{new_nb_path}'"
+    logger.info(logger_msg)
+    print(logger_msg)
 
 
 # Create a translated version of the notebook
 def make_translated_nb(config, language, nb_path):
+    print(f"Translating notebook '{nb_path}' to '{language}' ...")
     system_prompt = get_config_value(config, "system_prompt")
     translation_prompt = get_config_value(config, "translate", "prompt")
     translated_nb = generate_translated_nb(
@@ -90,7 +65,9 @@ def make_translated_nb(config, language, nb_path):
     )
     new_nb_path = get_new_nb_path(nb_path, f"translated_{language.lower()}")
     save_new_nb(translated_nb, new_nb_path)
-    logger.info(f"Saving translated notebook to '{new_nb_path}'")
+    logger_msg = f"Saved translated notebook to '{new_nb_path}'"
+    logger.info(logger_msg)
+    print(logger_msg)
 
 
 # Main function to execute the appropriate task based on arguments
