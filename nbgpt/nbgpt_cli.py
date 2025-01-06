@@ -49,8 +49,8 @@ def make_improved_nb(config, nb_path):
         system_prompt, analysis_prompt, improvement_prompt, nb_path
     )
     new_nb_path = get_new_nb_path(nb_path, "improved")
-    save_new_nb(improved_nb, new_nb_path)
-    logger_msg = f"Saved improved notebook to '{new_nb_path}'"
+    saved_nb_path = save_new_nb(improved_nb, new_nb_path)
+    logger_msg = f"Saved improved notebook to '{saved_nb_path}'"
     logger.info(logger_msg)
     print(logger_msg)
 
@@ -64,8 +64,8 @@ def make_translated_nb(config, language, nb_path):
         system_prompt, translation_prompt, nb_path, language
     )
     new_nb_path = get_new_nb_path(nb_path, f"translated_{language.lower()}")
-    save_new_nb(translated_nb, new_nb_path)
-    logger_msg = f"Saved translated notebook to '{new_nb_path}'"
+    saved_nb_path = save_new_nb(translated_nb, new_nb_path, use_output_dir=False)
+    logger_msg = f"Saved translated notebook to '{saved_nb_path}'"
     logger.info(logger_msg)
     print(logger_msg)
 

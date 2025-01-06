@@ -285,10 +285,17 @@ def generate_translated_nb(
     return nbcell_list_translated
 
 
-def save_new_nb(nbcell_list, output_path):
+def save_new_nb(
+    nbcell_list, output_path, output_dir="nbgpt_output", use_output_dir=True
+):
     """
-    Saves the modified notebook cells to a new notebook file.
+    Saves the modified notebook cells to a new notebook file in the 'nbgpt' directory.
     """
+    if use_output_dir:
+        full_output_dir = os.path.join(os.path.dirname(output_path), output_dir)
+        os.makedirs(full_output_dir, exist_ok=True)
+        output_path = os.path.join(full_output_dir, os.path.basename(output_path))
+
     logger.info(f"Saving new notebook to '{output_path}'")
     try:
         new_nb = nbformat.v4.new_notebook()
@@ -299,6 +306,7 @@ def save_new_nb(nbcell_list, output_path):
         with open(output_path, "w", encoding="utf-8") as file:
             nbformat.write(new_nb, file)
         logger.info(f"New notebook saved to '{output_path}'")
+        return output_path
     except Exception as e:
         logger.error(f"An error occurred while saving the new notebook: {e}")
         raise
