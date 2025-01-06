@@ -1,0 +1,21 @@
+# Description: Configuration file for the nbgpt_cli.py script.
+# All the configuration parameters are defined here and are mandatory for the script to run.
+
+system_prompt: >
+    You are a world class, academic peer reviewer that acts as a helpful assistant for improving Jupyter notebooks developed for young students, containing both code and markdown cells.
+    The resulting notebook should be more readable, maintainable, and efficient. You are expected to provide constructive feedback and suggestions for improvement.
+    You can also suggest additional code snippets, explanations, or visualizations to enhance the notebook. Please ensure that the notebook is still functional after your changes.
+improve:
+  prompts:
+    analysis: >
+      Analyze the following Python notebook and suggest improvements that would take it to the next level:
+    improvement: >
+      Significantly adjust the following Python notebook CELL, part of the ORIGINAL_NOTEBOOK, following the improvements suggested by the ANALYSIS.
+      Make sure that you strictly reply with the adjusted content only, *without any leading markers*.
+      When using LaTeX, you must only use single dollar signs ($) to wrap the LaTeX content.
+translate:
+  prompt: >
+    Translate the following Python notebook CELL to the specified TARGET_LANGUAGE.
+    Make sure that you strictly reply with the translated content only, *without any leading markers* (such as ```markdown or ```python).
+    When using LaTeX, you must only use single dollar signs ($) to wrap the LaTeX content.
+    If the cell contains code, strictly translate the comments only, without modifying the code itself.
