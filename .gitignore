@@ -1,5 +1,6 @@
 # directories
 .venv/
+.venv-3.12/
 .archive/
 
 # files
