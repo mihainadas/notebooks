@@ -8,6 +8,7 @@ This project contains Jupyter notebooks focused on machine learning concepts, pa
   - `perceptron.ipynb` - Original notebook
   - `perceptron_improved.ipynb` - Enhanced version
   - `perceptron_translated.ipynb` - Translated version
+- `logistic_regression/` - Binary classification example using logistic regression
 
 - `docs/` - Generated HTML documentation
 - `scratchpad/` - Experimental notebooks
