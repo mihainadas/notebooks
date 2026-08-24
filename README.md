@@ -1,33 +1,44 @@
-# Jupyter Notebook Documentation Generator
+# Machine learning notebooks
 
-This project contains Jupyter notebooks focused on machine learning concepts, particularly the Perceptron algorithm, along with tools to generate HTML documentation from these notebooks.
+Small, inspectable notebooks for foundational machine-learning ideas and research-side data analysis. The emphasis is on code that can be executed from top to bottom, with claims tied to saved outputs.
 
-## Project Structure
+## Curated notebooks
 
-- `perceptron/` - Contains Jupyter notebooks about the Perceptron algorithm
-  - `perceptron.ipynb` - Original notebook
-  - `perceptron_improved.ipynb` - Enhanced version
-  - `perceptron_translated.ipynb` - Translated version
-- `logistic_regression/` - Binary classification example using logistic regression
+| Notebook | Question | Status |
+| --- | --- | --- |
+| [`perceptron/perceptron.ipynb`](perceptron/perceptron.ipynb) | How does a perceptron update a separator over two input features? | Executable tutorial |
+| [`numpy/numpy_vs_python.ipynb`](numpy/numpy_vs_python.ipynb) | How should a NumPy-versus-loop microbenchmark be measured? | Executable benchmark |
+| [`logistic_regression/logistic_regression.ipynb`](logistic_regression/logistic_regression.ipynb) | What does a defensible tabular-classification baseline look like? | Executable baseline |
 
-- `docs/` - Generated HTML documentation
-- `scratchpad/` - Experimental notebooks
-- `generate_docs.sh` - Shell script to convert notebooks to HTML
+The `scratchpad/` directory contains experiments that may require external model downloads or retired APIs. It is not part of the tested set and should not be cited as a reproducible result. Earlier survey analyses and generated perceptron variants are retained with outputs cleared under `archive/`; neither is current work.
 
-## Requirements
-
-Install dependencies:
+## Run locally
 
 ```sh
-pip install -r requirements.txt
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python scripts/test_notebooks.py
 ```
 
-## Usage
-To convert a Jupyter notebook to HTML documentation:
+The test runner validates every notebook file, checks saved outputs outside `scratchpad/`, verifies the rendered-document source manifest, and executes the three curated, offline notebooks in isolated temporary copies. It fails on execution errors and warnings written to `stderr`.
 
-`./generate_docs.sh notebook_path.ipynb`
+To render one notebook for GitHub Pages:
 
-The generated HTML will be saved in the `docs` directory.
+```sh
+./generate_docs.sh perceptron/perceptron.ipynb perceptron_en.html
+```
+
+Generated HTML is written to `docs/`.
+
+## Reproducibility policy
+
+- Saved outputs must come from a clean top-to-bottom run.
+- Benchmarks report repeated measurements and the runtime environment; a single timing is not a result.
+- Randomized examples use fixed local generators rather than global state.
+- Warnings are treated as defects in the curated notebooks.
+- Research notebooks state their population and denominators; exploratory work stays in `scratchpad/` until it meets the same bar.
 
 ## License
+
 [MIT](LICENSE)
